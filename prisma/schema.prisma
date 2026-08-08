@@ -1,0 +1,33 @@
+// Prisma schema for AI Content Dashboard
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Post model matches the n8n AI Agent workflow output:
+// - selected_topic
+// - reason
+// - post
+// - hashtags
+// - source
+model Post {
+  id             String   @id @default(cuid())
+  selectedTopic  String   @map("selected_topic")
+  source         String
+  post           String   @db.Text
+  hashtags       String[]
+  reason         String   @db.Text
+  status         String   @default("pending") // pending | approved | rejected
+  rejectedReason String?  @map("rejected_reason") @db.Text
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("posts")
+}
+
