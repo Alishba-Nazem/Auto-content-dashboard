@@ -28,7 +28,11 @@ function validatePostBody(body: IncomingPostBody) {
     return "post is required";
   }
 
-  if (!Array.isArray(hashtags) || hashtags.length === 0 || !hashtags.every(isString)) {
+  if (
+    !Array.isArray(hashtags) ||
+    hashtags.length === 0 ||
+    !hashtags.every(isString)
+  ) {
     return "hashtags must be a non-empty array of strings";
   }
 
@@ -46,7 +50,10 @@ export async function POST(request: Request) {
     body = (await request.json()) as IncomingPostBody;
   } catch {
     return NextResponse.json(
-      { success: false, error: "Invalid JSON body" },
+      {
+        success: false,
+        error: "Invalid JSON body",
+      },
       { status: 400 }
     );
   }
@@ -55,18 +62,28 @@ export async function POST(request: Request) {
 
   if (validationError) {
     return NextResponse.json(
-      { success: false, error: validationError },
+      {
+        success: false,
+        error: validationError,
+      },
       { status: 400 }
     );
   }
 
+  // Validation above guarantees these values have the correct types.
+  const selectedTopic = body.selectedTopic as string;
+  const reason = body.reason as string;
+  const postContent = body.post as string;
+  const hashtags = body.hashtags as string[];
+  const source = body.source as string;
+
   const post = await prisma.post.create({
     data: {
-      selectedTopic: body.selectedTopic.trim(),
-      reason: body.reason.trim(),
-      post: body.post.trim(),
-      hashtags: body.hashtags.map((tag) => tag.trim()),
-      source: body.source.trim(),
+      selectedTopic: selectedTopic.trim(),
+      reason: reason.trim(),
+      post: postContent.trim(),
+      hashtags: hashtags.map((tag) => tag.trim()),
+      source: source.trim(),
     },
   });
 
